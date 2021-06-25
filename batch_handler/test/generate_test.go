@@ -1,7 +1,7 @@
 package test
 
 import (
-	bh "github.com/duchiporexia/goutils/batch_handler"
+	bh "github.com/duchiporexia/goutils/batch_handler/internal"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

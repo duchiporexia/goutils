@@ -1,15 +1,15 @@
-package batch_handler
+package internal
 
 import (
 	"bytes"
 	"fmt"
+	utilscommon "github.com/duchiporexia/goutils/internal"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/imports"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"unicode"
 )
@@ -19,9 +19,9 @@ import (
 type handlerData struct {
 	Package    string
 	Name       string
-	KeyType    *goType
-	ParamsType *goType
-	ValueType  *goType
+	KeyType    *utilscommon.GoType
+	ParamsType *utilscommon.GoType
+	ValueType  *utilscommon.GoType
 
 	IsBatched   bool
 	HandlerType HandlerType
@@ -106,96 +106,18 @@ func (o HandlerType) hasCacheDel() bool {
 	return o == HandlerTypeUpdate
 }
 
-type goType struct {
-	Modifiers  string
-	ImportPath string
-	ImportName string
-	Name       string
-}
-
-func (t *goType) String() string {
-	if t.ImportName != "" {
-		return t.Modifiers + t.ImportName + "." + t.Name
-	}
-
-	return t.Modifiers + t.Name
-}
-
-func (t *goType) IsPtr() bool {
-	return strings.HasPrefix(t.Modifiers, "*")
-}
-
-func (t *goType) IsSlice() bool {
-	return strings.HasPrefix(t.Modifiers, "[]")
-}
-
-var partsRe = regexp.MustCompile(`^([\[\]\*]*)(.*?)(\.\w*)?$`)
-
-func parseType(str string) (*goType, error) {
-	if str == "" {
-		return nil, nil
-	}
-	parts := partsRe.FindStringSubmatch(str)
-	if len(parts) != 4 {
-		return nil, fmt.Errorf("type must be in the form []*github.com/import/path.Name")
-	}
-
-	t := &goType{
-		Modifiers:  parts[1],
-		ImportPath: parts[2],
-		Name:       strings.TrimPrefix(parts[3], "."),
-	}
-
-	if t.Name == "" {
-		t.Name = t.ImportPath
-		t.ImportPath = ""
-	}
-
-	if t.ImportPath != "" {
-		p, err := packages.Load(&packages.Config{Mode: packages.NeedName}, t.ImportPath)
-		if err != nil {
-			return nil, err
-		}
-		if len(p) != 1 {
-			return nil, fmt.Errorf("not found")
-		}
-
-		t.ImportName = p[0].Name
-	}
-
-	return t, nil
-}
-
-func GetGoTypeName(gotype *goType) string {
+func GetGoTypeName(gotype *utilscommon.GoType) string {
 	if gotype == nil {
 		return ""
 	}
 	return gotype.String()
 }
 
-func GetZeroValue(gotype *goType) string {
+func GetZeroValue(gotype *utilscommon.GoType) string {
 	if gotype == nil {
 		return ""
 	}
-	if gotype.IsPtr() {
-		return "nil"
-	}
-	basicType := gotype.Name
-	switch basicType {
-	case "bool":
-		return "false"
-	case "string":
-		return "\"\""
-	case "int", "int8", "int16", "int32", "int64",
-		"uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
-		"byte",
-		"rune",
-		"float32", "float64",
-		"complex64", "complex128":
-		return basicType + "(0)"
-	default:
-		return gotype.String() + "{}"
-	}
+	return gotype.ZeroValue()
 }
 
 func Generate(name string, keyType string, paramsType string, valueType string, isBatched bool, handlerType HandlerType) error {
@@ -230,7 +152,7 @@ func getHandlerData(name string, keyType string, paramsType string, valueType st
 	data.Package = genPkg.Name
 
 	//////////////////////////////////////////////////////
-	data.KeyType, err = parseType(keyType)
+	data.KeyType, err = utilscommon.ParseType(keyType)
 	if err != nil {
 		return nil, fmt.Errorf("KeyType: %s", err.Error())
 	}
@@ -239,7 +161,7 @@ func getHandlerData(name string, keyType string, paramsType string, valueType st
 		data.KeyType.ImportPath = ""
 	}
 	//////////////////////////////////////////////////////
-	data.ParamsType, err = parseType(paramsType)
+	data.ParamsType, err = utilscommon.ParseType(paramsType)
 	if err != nil {
 		return nil, fmt.Errorf("ParamsType: %s", err.Error())
 	}
@@ -248,7 +170,7 @@ func getHandlerData(name string, keyType string, paramsType string, valueType st
 		data.ParamsType.ImportPath = ""
 	}
 	//////////////////////////////////////////////////////
-	data.ValueType, err = parseType(valueType)
+	data.ValueType, err = utilscommon.ParseType(valueType)
 	if err != nil {
 		return nil, fmt.Errorf("ValueType: %s", err.Error())
 	}

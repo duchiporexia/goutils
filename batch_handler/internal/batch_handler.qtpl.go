@@ -2,7 +2,7 @@
 // See https://github.com/valyala/quicktemplate for details.
 
 //line batch_handler.qtpl:1
-package batch_handler
+package internal
 
 //line batch_handler.qtpl:1
 import (
