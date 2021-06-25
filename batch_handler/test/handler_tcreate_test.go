@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"servicehub/common/batch_handler/test/dto"
+	"github.com/duchiporexia/goutils/batch_handler/test/dto"
 	"testing"
 	"time"
 )

@@ -1,14 +1,14 @@
 package test
 
 import (
+	bh "github.com/duchiporexia/goutils/batch_handler"
 	"github.com/stretchr/testify/assert"
-	bh "servicehub/common/batch_handler"
 	"testing"
 )
 
 func TestGenerateAllHandlers(t *testing.T) {
-	paramsType := "servicehub/common/batch_handler/test/dto.DogPo"
-	valueType := "*servicehub/common/batch_handler/test/dto.Dog"
+	paramsType := "github.com/duchiporexia/goutils/batch_handler/test/dto.DogPo"
+	valueType := "*github.com/duchiporexia/goutils/batch_handler/test/dto.Dog"
 
 	assert.NoError(t, bh.Generate("TCreateNvHandler", "", paramsType, "", true, bh.HandlerTypeCreate))
 	assert.NoError(t, bh.Generate("TCreateHvHandler", "", paramsType, valueType, true, bh.HandlerTypeCreate))

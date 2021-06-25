@@ -3,8 +3,8 @@ package test
 import (
 	"errors"
 	"fmt"
+	"github.com/duchiporexia/goutils/batch_handler/test/dto"
 	"github.com/stretchr/testify/assert"
-	"servicehub/common/batch_handler/test/dto"
 	"strconv"
 	"sync"
 	"testing"
