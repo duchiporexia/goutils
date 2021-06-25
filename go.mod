@@ -1,4 +1,4 @@
-module duchiporexia/goutils
+module github.com/duchiporexia/goutils
 
 go 1.16
 
