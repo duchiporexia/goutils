@@ -4,12 +4,6 @@ import (
 	"fmt"
 	"github.com/duchiporexia/goutils/batch_handler/test/dto"
 	"testing"
-	"time"
-)
-
-const (
-	wait         = time.Millisecond * 2
-	maxBatchSize = 5
 )
 
 func TestTCreateHandlers(t *testing.T) {
